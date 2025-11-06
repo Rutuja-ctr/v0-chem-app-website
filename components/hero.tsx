@@ -1,8 +1,39 @@
+
 "use client"
 
 import { Download, Sparkles } from "lucide-react"
+import { useState } from "react"
 
 export default function Hero() {
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownloadAPK = async () => {
+    try {
+      setIsDownloading(true)
+      const response = await fetch("/ChemApp.apk")
+
+      if (!response.ok) {
+        alert("APK file not found. Please contact support.")
+        return
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "ChemApp.apk"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Download failed:", error)
+      alert("Failed to download APK. Please try again.")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Gradient Background */}
@@ -30,9 +61,13 @@ export default function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <button className="px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition flex items-center justify-center gap-2">
+          <button
+            onClick={handleDownloadAPK}
+            disabled={isDownloading}
+            className="px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download className="w-5 h-5" />
-            Download APK
+            {isDownloading ? "Downloading..." : "Download APK"}
           </button>
           <button className="px-8 py-3 border border-primary/50 text-foreground font-semibold rounded-lg hover:bg-primary/10 transition">
             Learn More
